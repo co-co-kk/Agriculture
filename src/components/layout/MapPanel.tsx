@@ -79,9 +79,9 @@ export const MapPanel = ({
 
               {/* 在影像上叠加检测框，增强视觉真实性。 */}
               {frameDetections.map((item) => (
-                <div
+                <dviv
                   key={item.id}
-                  className="absolute border-2 border-rose-500/90"
+                  // className="absolute border-2 border-rose-500/90"
                   style={{
                     left: `${item.bbox.x * 100}%`,
                     top: `${item.bbox.y * 100}%`,
