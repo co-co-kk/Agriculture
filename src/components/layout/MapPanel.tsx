@@ -79,7 +79,7 @@ export const MapPanel = ({
 
               {/* 在影像上叠加检测框，增强视觉真实性。 */}
               {frameDetections.map((item) => (
-                <dviv
+                <div
                   key={item.id}
                   // className="absolute border-2 border-rose-500/90"
                   style={{
