@@ -8,9 +8,11 @@ import type {
   DroneMission,
   GeoGridCell,
   LngLat,
+  NutrientDetection,
   PestDetection,
   Plot,
   SceneType,
+  WeedDetection,
 } from '@/types/domain'
 
 interface MapPanelProps {
@@ -23,26 +25,44 @@ interface MapPanelProps {
   onSelectPlot: (plotId: string) => void
 }
 
-// 根据当前帧反查地块中心点，用于地图光标定位。
-const resolveActivePoint = (framePlotId: string | undefined, plots: Plot[]): LngLat | null => {
+type SceneDetection = DiseaseDetection | PestDetection | NutrientDetection | WeedDetection
+
+const resolveActivePoint = (framePlotId: string | undefined, plotList: Plot[]): LngLat | null => {
   if (!framePlotId) {
     return null
   }
-  return plots.find((item) => item.id === framePlotId)?.center ?? null
+  return plotList.find((item) => item.id === framePlotId)?.center ?? null
 }
 
-// 按场景提取当前帧检测列表，便于统一渲染逻辑。
-const pickDetections = (
-  scene: SceneType,
-  detections: DetectionResponse | undefined,
-): Array<DiseaseDetection | PestDetection> => {
+const pickDetections = (scene: SceneType, detections: DetectionResponse | undefined): SceneDetection[] => {
   if (!detections) {
     return []
   }
-  return scene === 'disease' ? detections.diseaseDetections : detections.pestDetections
+  if (scene === 'disease') {
+    return detections.diseaseDetections
+  }
+  if (scene === 'pest') {
+    return detections.pestDetections
+  }
+  if (scene === 'nutrient') {
+    return detections.nutrientDetections
+  }
+  return detections.weedDetections
 }
 
-// 导出地图面板组件，承载地图与帧级识别可视化。
+const detectionTag = (scene: SceneType, item: SceneDetection): string => {
+  if (scene === 'disease') {
+    return (item as DiseaseDetection).agentType
+  }
+  if (scene === 'pest') {
+    return (item as PestDetection).pestType
+  }
+  if (scene === 'nutrient') {
+    return (item as NutrientDetection).deficiencyType
+  }
+  return (item as WeedDetection).weedType
+}
+
 export const MapPanel = ({
   scene,
   plots,
@@ -77,11 +97,10 @@ export const MapPanel = ({
             <div className="relative overflow-hidden rounded-xl border border-slate-200 lg:col-span-2">
               <img src={frame.imageUrl} alt="无人机识别帧" className="h-full w-full object-cover" />
 
-              {/* 在影像上叠加检测框，增强视觉真实性。 */}
               {frameDetections.map((item) => (
                 <div
                   key={item.id}
-                  // className="absolute border-2 border-rose-500/90"
+                  className="absolute border-2 border-rose-500/90"
                   style={{
                     left: `${item.bbox.x * 100}%`,
                     top: `${item.bbox.y * 100}%`,
@@ -108,9 +127,7 @@ export const MapPanel = ({
                     className="w-full rounded-lg bg-white px-2 py-1 text-left text-xs text-slate-600 hover:bg-emerald-50"
                     onClick={() => onSelectPlot(item.plotId)}
                   >
-                    {scene === 'disease'
-                      ? `地块${item.plotId} · ${(item as DiseaseDetection).agentType}`
-                      : `地块${item.plotId} · ${(item as PestDetection).pestType}`}
+                    地块{item.plotId} · {detectionTag(scene, item)}
                   </button>
                 ))}
               </div>

@@ -1,7 +1,6 @@
-/* 该文件用于加载 Tailwind 并定义农业主题的全局视觉变量。 */
+/* 该文件用于加载 Tailwind 并定义平台全局视觉变量。 */
 @import 'tailwindcss';
 
-/* 定义平台统一色板，避免组件内写死颜色值。 */
 :root {
   --bg-main: #f5f8ed;
   --bg-panel: #ffffff;
@@ -14,7 +13,6 @@
   --risk-critical: #991b1b;
 }
 
-/* 提供页面基础字体和底色，形成统一视觉基线。 */
 body {
   margin: 0;
   min-height: 100vh;
@@ -23,21 +21,18 @@ body {
     radial-gradient(circle at 84% 82%, rgba(20, 184, 166, 0.15), transparent 28%),
     var(--bg-main);
   color: var(--text-main);
-  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'SF Pro Text', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* 强化滚动条可视性，便于重数据面板的浏览操作。 */
 * {
   scrollbar-width: thin;
   scrollbar-color: #9ca3af #e5e7eb;
 }
 
-/* 提供细线边框工具类，便于面板统一风格。 */
 .panel-border {
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-/* 为地图容器提供固定高度，避免首屏抖动。 */
 .map-shell {
   min-height: 430px;
 }

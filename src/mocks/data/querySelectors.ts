@@ -1,105 +1,108 @@
-// 该文件提供接口层查询函数，统一处理筛选与联动数据。
-import { dataset } from '@/mocks/data/dataset'
-import { buildDiseaseDashboard, buildPestDashboard } from '@/mocks/data/dashboardSelectors'
-import type {
-  AlertEvent,
-  AnalysisReport,
-  DiseaseDetection,
-  DroneMission,
-  MissionFrame,
-  PestDetection,
-  SceneType,
-  SeverityLevel,
-} from '@/types/domain'
+// 该文件提供接口层查询函数，统一处理场景筛选与快照查询。
+import {
+  createIngestionJob,
+  getFarmData,
+  listJobs,
+  listSnapshots,
+  listSources,
+  queryAlertsBySnapshot,
+  queryDashboardBySnapshot,
+  queryDetectionsBySnapshot,
+  queryReportBySnapshot,
+  queryMissionsBySnapshot,
+  querySnapshotCompare,
+  setCurrentSnapshot,
+  startAnalysis,
+} from '@/mocks/data/snapshotStore'
+import type { SceneType, SeverityLevel } from '@/types/domain'
 
-// 查询场景看板数据，自动按场景路由到对应构建器。
+// 查询农场基础信息。
+export const queryFarm = () => {
+  return getFarmData()
+}
+
+// 查询场景看板数据。
 export const queryDashboard = (params: {
   scene: SceneType
+  snapshotId: string | null
   agentType?: string
   severity?: SeverityLevel
   pestType?: string
+  deficiencyType?: string
+  weedType?: string
 }) => {
-  if (params.scene === 'disease') {
-    return buildDiseaseDashboard({
-      agentType: params.agentType,
-      severity: params.severity,
-    })
-  }
-  return buildPestDashboard({ pestType: params.pestType })
-}
-
-// 查询当前场景任务列表，供时间轴与任务下拉复用。
-export const queryMissions = (scene: SceneType): DroneMission[] => {
-  return dataset.missions[scene]
-}
-
-// 查询当前场景告警流，按时间倒序返回。
-export const queryAlerts = (scene: SceneType): AlertEvent[] => {
-  return dataset.alerts[scene]
-}
-
-// 查询当前场景报告，用于右侧抽屉展示与导出。
-export const queryReport = (scene: SceneType): AnalysisReport => {
-  return dataset.reports[scene]
-}
-
-// 根据任务与帧索引查找具体影像帧。
-const findFrame = (missionId: string, frameIndex: number): MissionFrame | null => {
-  const mission = [...dataset.missions.disease, ...dataset.missions.pest].find((item) => item.id === missionId)
-  if (!mission) {
-    return null
-  }
-  return mission.frames[frameIndex] ?? mission.frames[0] ?? null
-}
-
-// 按帧筛选病害检测结果并应用筛选条件。
-const filterDiseaseDetections = (
-  frameId: string,
-  missionId: string,
-  agentType?: string,
-  severity?: SeverityLevel,
-): DiseaseDetection[] => {
-  return dataset.detections.disease.filter((item) => {
-    const passFrame = item.frameId === frameId && item.missionId === missionId
-    const passAgent = agentType ? item.agentType === agentType : true
-    const passSeverity = severity ? item.severity === severity : true
-    return passFrame && passAgent && passSeverity
+  // 当前版本按快照聚合返回，筛选字段保留在 detections 查询层使用。
+  return queryDashboardBySnapshot({
+    scene: params.scene,
+    snapshotId: params.snapshotId,
   })
 }
 
-// 按帧筛选虫害检测结果并应用虫种筛选。
-const filterPestDetections = (frameId: string, missionId: string, pestType?: string): PestDetection[] => {
-  return dataset.detections.pest.filter((item) => {
-    const passFrame = item.frameId === frameId && item.missionId === missionId
-    const passType = pestType ? item.pestType === pestType : true
-    return passFrame && passType
-  })
+// 查询场景任务列表。
+export const queryMissions = (scene: SceneType, snapshotId: string | null) => {
+  return queryMissionsBySnapshot(scene, snapshotId)
 }
 
-// 查询当前帧识别明细，供中部影像预览与标注层渲染。
+// 查询场景告警流。
+export const queryAlerts = (scene: SceneType, snapshotId: string | null) => {
+  return queryAlertsBySnapshot(scene, snapshotId)
+}
+
+// 查询场景报告。
+export const queryReport = (scene: SceneType, snapshotId: string | null) => {
+  return queryReportBySnapshot(scene, snapshotId)
+}
+
+// 查询当前帧识别结果。
 export const queryDetectionsByFrame = (params: {
   scene: SceneType
+  snapshotId: string | null
   missionId: string
   frameIndex: number
   agentType?: string
   severity?: SeverityLevel
   pestType?: string
+  deficiencyType?: string
+  weedType?: string
 }) => {
-  const frame = findFrame(params.missionId, params.frameIndex)
-  if (!frame) {
-    return {
-      frame: null,
-      diseaseDetections: [],
-      pestDetections: [],
-    }
-  }
+  return queryDetectionsBySnapshot(params)
+}
 
-  return {
-    frame,
-    diseaseDetections:
-      params.scene === 'disease'
-        ? filterDiseaseDetections(frame.id, params.missionId, params.agentType, params.severity)
-        : [],
-    pestDetections: params.scene === 'pest' ? filterPestDetections(frame.id, params.missionId, params.pestType) : [],
-  }
+// 查询数据源列表。
+export const querySources = () => {
+  return listSources()
+}
+
+// 查询采集任务列表。
+export const queryIngestionJobs = () => {
+  return listJobs()
+}
+
+// 触发采集任务。
+export const createJob = (sourceId: string) => {
+  return createIngestionJob(sourceId)
+}
+
+// 触发解析任务。
+export const analyzeJob = (jobId: string) => {
+  return startAnalysis(jobId)
+}
+
+// 查询快照列表。
+export const querySnapshots = () => {
+  return listSnapshots()
+}
+
+// 设置当前快照。
+export const updateCurrentSnapshot = (snapshotId: string) => {
+  return setCurrentSnapshot(snapshotId)
+}
+
+// 查询双版本对比。
+export const queryCompare = (leftSnapshotId: string, rightSnapshotId: string, scene: SceneType) => {
+  return querySnapshotCompare({
+    leftSnapshotId,
+    rightSnapshotId,
+    scene,
+  })
 }

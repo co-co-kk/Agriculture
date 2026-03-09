@@ -1,12 +1,18 @@
-// 该文件定义农业 AI 平台的核心业务类型，供 mock、状态与组件统一复用。
+// 该文件定义农业 AI 平台的核心业务类型，供页面、mock 与状态层统一复用。
 
 // 场景类型用于控制页面模块切换和接口数据域。
-export type SceneType = 'disease' | 'pest'
+export type SceneType = 'disease' | 'pest' | 'nutrient' | 'weed'
 
-// 病害感染类型用于场景1统计与筛选。
+// 病害感染类型用于病害场景统计与筛选。
 export type DiseaseAgentType = 'fungus' | 'bacteria' | 'virus'
 
-// 病害严重度用于告警分级和处置建议优先级。
+// 营养缺失类型用于营养诊断场景分析。
+export type NutrientDeficiencyType = '缺氮' | '缺磷' | '缺钾'
+
+// 杂草类型用于精准喷洒规划。
+export type WeedType = '阔叶杂草' | '禾本科杂草' | '莎草'
+
+// 严重度用于告警分级和处置建议优先级。
 export type SeverityLevel = '轻度' | '中度' | '重度'
 
 // 告警等级用于右侧告警流样式映射。
@@ -15,7 +21,7 @@ export type AlertLevel = '提示' | '预警' | '严重'
 // 地图点位采用经纬度数组表达，便于直接喂给地图引擎。
 export type LngLat = [number, number]
 
-// 统一定义识别框结构，用于病害和虫害目标框展示。
+// 统一定义识别框结构，用于四类场景目标框展示。
 export interface BoundingBox {
   x: number
   y: number
@@ -76,7 +82,7 @@ export interface GeoGridCell {
   confidence: number
 }
 
-// 病害识别结果用于场景1目标框和类别统计。
+// 病害识别结果用于病害场景目标框和类别统计。
 export interface DiseaseDetection {
   id: string
   missionId: string
@@ -88,7 +94,7 @@ export interface DiseaseDetection {
   confidence: number
 }
 
-// 害虫识别结果用于场景2数量趋势和密度分析。
+// 虫害识别结果用于虫害场景数量趋势和密度分析。
 export interface PestDetection {
   id: string
   missionId: string
@@ -97,6 +103,32 @@ export interface PestDetection {
   pestType: string
   count: number
   density: number
+  bbox: BoundingBox
+  confidence: number
+}
+
+// 营养缺失识别结果用于营养诊断场景。
+export interface NutrientDetection {
+  id: string
+  missionId: string
+  frameId: string
+  plotId: string
+  deficiencyType: NutrientDeficiencyType
+  severity: SeverityLevel
+  ndviGap: number
+  bbox: BoundingBox
+  confidence: number
+}
+
+// 杂草识别结果用于喷洒区域规划场景。
+export interface WeedDetection {
+  id: string
+  missionId: string
+  frameId: string
+  plotId: string
+  weedType: WeedType
+  coverage: number
+  sprayZone: 'A区' | 'B区' | 'C区'
   bbox: BoundingBox
   confidence: number
 }
@@ -138,7 +170,7 @@ export interface HotAreaItem {
   issue: string
 }
 
-// 病害场景的看板数据结构。
+// 病害场景看板数据结构。
 export interface DiseaseDashboardData {
   scene: 'disease'
   kpis: DashboardKpi[]
@@ -149,13 +181,35 @@ export interface DiseaseDashboardData {
   suggestions: SuggestionItem[]
 }
 
-// 虫害场景的看板数据结构。
+// 虫害场景看板数据结构。
 export interface PestDashboardData {
   scene: 'pest'
   kpis: DashboardKpi[]
   mapCells: GeoGridCell[]
   pestDistribution: Array<{ name: string; value: number }>
   densityTrend: Array<{ time: string; value: number }>
+  hotAreas: HotAreaItem[]
+  suggestions: SuggestionItem[]
+}
+
+// 营养诊断场景看板数据结构。
+export interface NutrientDashboardData {
+  scene: 'nutrient'
+  kpis: DashboardKpi[]
+  mapCells: GeoGridCell[]
+  deficiencyDistribution: Array<{ name: string; value: number }>
+  severityDistribution: Array<{ name: string; value: number }>
+  hotAreas: HotAreaItem[]
+  suggestions: SuggestionItem[]
+}
+
+// 杂草喷洒规划场景看板数据结构。
+export interface WeedDashboardData {
+  scene: 'weed'
+  kpis: DashboardKpi[]
+  mapCells: GeoGridCell[]
+  weedDistribution: Array<{ name: string; value: number }>
+  sprayAreaTrend: Array<{ time: string; value: number }>
   hotAreas: HotAreaItem[]
   suggestions: SuggestionItem[]
 }

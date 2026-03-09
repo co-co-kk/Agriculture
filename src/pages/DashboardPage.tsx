@@ -2,6 +2,7 @@
 import { useEffect, useMemo } from 'react'
 import { ReportDrawer } from '@/components/common/ReportDrawer'
 import { EmptyState } from '@/components/common/EmptyState'
+import { ComparePanel } from '@/components/layout/ComparePanel'
 import { HeaderBar } from '@/components/layout/HeaderBar'
 import { LeftSidebar } from '@/components/layout/LeftSidebar'
 import { MapPanel } from '@/components/layout/MapPanel'
@@ -11,10 +12,14 @@ import { useDashboardData } from '@/hooks/useDashboardData'
 import { usePlayback } from '@/hooks/usePlayback'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
-// 导出看板页面组件，承载全部场景 DOM 结构。
-export const DashboardPage = (): JSX.Element => {
+interface DashboardPageProps {
+  onOpenDataCenter: () => void
+}
+
+export const DashboardPage = ({ onOpenDataCenter }: DashboardPageProps): JSX.Element => {
   const scene = useDashboardStore((state) => state.scene)
   const filter = useDashboardStore((state) => state.filter)
+  const comparison = useDashboardStore((state) => state.comparison)
   const selectedPlotId = useDashboardStore((state) => state.selectedPlotId)
   const selectedMissionId = useDashboardStore((state) => state.selectedMissionId)
   const frameIndex = useDashboardStore((state) => state.frameIndex)
@@ -23,6 +28,10 @@ export const DashboardPage = (): JSX.Element => {
 
   const setScene = useDashboardStore((state) => state.setScene)
   const setFilter = useDashboardStore((state) => state.setFilter)
+  const setSnapshotId = useDashboardStore((state) => state.setSnapshotId)
+  const setComparisonEnabled = useDashboardStore((state) => state.setComparisonEnabled)
+  const setComparisonLeftSnapshotId = useDashboardStore((state) => state.setComparisonLeftSnapshotId)
+  const setComparisonRightSnapshotId = useDashboardStore((state) => state.setComparisonRightSnapshotId)
   const setSelectedPlotId = useDashboardStore((state) => state.setSelectedPlotId)
   const setSelectedMissionId = useDashboardStore((state) => state.setSelectedMissionId)
   const setFrameIndex = useDashboardStore((state) => state.setFrameIndex)
@@ -31,20 +40,17 @@ export const DashboardPage = (): JSX.Element => {
 
   const data = useDashboardData()
 
-  // 选择当前任务对象，供地图轨迹和回放组件共享。
   const currentMission = useMemo(
     () => data.missions.find((item) => item.id === data.missionId) ?? data.missions[0],
     [data.missions, data.missionId],
   )
 
-  // 初次加载或场景切换后自动选中首个任务。
   useEffect(() => {
     if (!selectedMissionId && data.missions[0]) {
       setSelectedMissionId(data.missions[0].id)
     }
   }, [selectedMissionId, data.missions, setSelectedMissionId])
 
-  // 启用时间轴自动播放逻辑。
   usePlayback(currentMission)
 
   const mapCells = data.dashboard?.mapCells ?? []
@@ -56,17 +62,26 @@ export const DashboardPage = (): JSX.Element => {
       <HeaderBar
         scene={scene}
         kpis={data.dashboard?.kpis ?? []}
+        snapshots={data.snapshots}
+        snapshotId={data.snapshotId}
+        compareEnabled={comparison.enabled}
+        compareLeftSnapshotId={comparison.leftSnapshotId}
+        compareRightSnapshotId={comparison.rightSnapshotId}
         onSceneChange={setScene}
+        onSnapshotChange={setSnapshotId}
+        onCompareEnabledChange={setComparisonEnabled}
+        onCompareLeftSnapshotChange={setComparisonLeftSnapshotId}
+        onCompareRightSnapshotChange={setComparisonRightSnapshotId}
         onRefresh={() => void data.refetchAll()}
         onOpenReport={() => setReportOpen(true)}
+        onOpenDataCenter={onOpenDataCenter}
       />
 
-      {data.isError ? (
-        <EmptyState title="数据加载失败" description="请检查 mock 服务状态后重试" />
-      ) : null}
+      {comparison.enabled ? <ComparePanel result={data.compareResult} /> : null}
+
+      {data.isError ? <EmptyState title="数据加载失败" description="请检查 mock 服务状态后重试" /> : null}
 
       <section className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        {/* 左侧分析区 */}
         <LeftSidebar
           scene={scene}
           dashboard={data.dashboard}
@@ -75,7 +90,6 @@ export const DashboardPage = (): JSX.Element => {
           onFilterChange={setFilter}
         />
 
-        {/* 中部地图与影像区 */}
         <MapPanel
           scene={scene}
           plots={data.plots}
@@ -86,7 +100,6 @@ export const DashboardPage = (): JSX.Element => {
           onSelectPlot={setSelectedPlotId}
         />
 
-        {/* 右侧告警与建议区 */}
         <RightSidebar
           alerts={data.alerts}
           hotAreas={hotAreas}

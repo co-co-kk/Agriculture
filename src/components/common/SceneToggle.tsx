@@ -1,4 +1,4 @@
-// 该文件提供场景切换按钮组，控制病害与虫害看板切换。
+// 该文件提供场景切换按钮组，控制四场景看板切换。
 import { clsx } from 'clsx'
 import type { SceneType } from '@/types/domain'
 
@@ -7,30 +7,29 @@ interface SceneToggleProps {
   onChange: (scene: SceneType) => void
 }
 
-// 导出场景切换组件，保证统一的交互和样式反馈。
+const sceneItems: Array<{ key: SceneType; label: string; activeClass: string }> = [
+  { key: 'disease', label: '病害识别', activeClass: 'bg-emerald-700 text-white shadow-sm' },
+  { key: 'pest', label: '虫害检测', activeClass: 'bg-cyan-700 text-white shadow-sm' },
+  { key: 'nutrient', label: '营养诊断', activeClass: 'bg-lime-700 text-white shadow-sm' },
+  { key: 'weed', label: '杂草喷洒规划', activeClass: 'bg-teal-700 text-white shadow-sm' },
+]
+
 export const SceneToggle = ({ value, onChange }: SceneToggleProps): JSX.Element => {
   return (
-    <div className="inline-flex rounded-xl bg-slate-100 p-1">
-      <button
-        type="button"
-        onClick={() => onChange('disease')}
-        className={clsx(
-          'rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-          value === 'disease' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900',
-        )}
-      >
-        病害识别
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange('pest')}
-        className={clsx(
-          'rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-          value === 'pest' ? 'bg-cyan-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900',
-        )}
-      >
-        虫害检测
-      </button>
+    <div className="inline-flex flex-wrap rounded-xl bg-slate-100 p-1">
+      {sceneItems.map((item) => (
+        <button
+          type="button"
+          key={item.key}
+          onClick={() => onChange(item.key)}
+          className={clsx(
+            'rounded-lg px-3 py-2 text-xs font-medium transition-colors',
+            value === item.key ? item.activeClass : 'text-slate-600 hover:text-slate-900',
+          )}
+        >
+          {item.label}
+        </button>
+      ))}
     </div>
   )
 }

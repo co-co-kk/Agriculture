@@ -3,21 +3,25 @@ import { HttpResponse, delay, http } from 'msw'
 import { queryDetectionsByFrame } from '@/mocks/data/querySelectors'
 import type { SceneType, SeverityLevel } from '@/types/domain'
 
-// 解析场景参数并提供默认值。
 const parseScene = (value: string | null): SceneType => {
-  return value === 'pest' ? 'pest' : 'disease'
+  if (value === 'pest' || value === 'nutrient' || value === 'weed') {
+    return value
+  }
+  return 'disease'
 }
 
-// 导出识别接口 handler，支持按场景和筛选条件查询。
 export const detectionHandlers = [
   http.get('/api/detections', async ({ request }) => {
     const url = new URL(request.url)
     const scene = parseScene(url.searchParams.get('scene'))
+    const snapshotId = url.searchParams.get('snapshotId')
     const missionId = url.searchParams.get('missionId') ?? ''
     const frameIndex = Number(url.searchParams.get('frameIndex') ?? '0')
     const severity = (url.searchParams.get('severity') ?? undefined) as SeverityLevel | undefined
     const agentType = url.searchParams.get('agentType') ?? undefined
     const pestType = url.searchParams.get('pestType') ?? undefined
+    const deficiencyType = url.searchParams.get('deficiencyType') ?? undefined
+    const weedType = url.searchParams.get('weedType') ?? undefined
 
     if (!missionId) {
       return HttpResponse.json(
@@ -26,6 +30,8 @@ export const detectionHandlers = [
           frame: null,
           diseaseDetections: [],
           pestDetections: [],
+          nutrientDetections: [],
+          weedDetections: [],
         },
         { status: 400 },
       )
@@ -35,11 +41,14 @@ export const detectionHandlers = [
 
     const result = queryDetectionsByFrame({
       scene,
+      snapshotId,
       missionId,
       frameIndex,
       severity,
       agentType,
       pestType,
+      deficiencyType,
+      weedType,
     })
 
     return HttpResponse.json({

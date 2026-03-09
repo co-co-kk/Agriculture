@@ -1,12 +1,17 @@
-// 该文件用于验证看板状态管理的核心行为。
+// 该文件用于验证看板状态管理核心行为。
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
-// 在每个用例前重置状态，确保测试相互独立。
 beforeEach(() => {
   useDashboardStore.setState({
     scene: 'disease',
     filter: {},
+    snapshotId: null,
+    comparison: {
+      enabled: false,
+      leftSnapshotId: null,
+      rightSnapshotId: null,
+    },
     selectedPlotId: null,
     selectedMissionId: null,
     frameIndex: 0,
@@ -30,12 +35,13 @@ describe('dashboardStore', () => {
     expect(state.isPlaying).toBe(false)
   })
 
-  it('设置任务时应重置帧索引', () => {
-    useDashboardStore.setState({ frameIndex: 12 })
-    useDashboardStore.getState().setSelectedMissionId('disease-mission-03')
+  it('设置快照时应重置任务与帧索引', () => {
+    useDashboardStore.setState({ frameIndex: 9, selectedMissionId: 'disease-mission-03' })
+    useDashboardStore.getState().setSnapshotId('snapshot-x')
 
     const state = useDashboardStore.getState()
-    expect(state.selectedMissionId).toBe('disease-mission-03')
+    expect(state.snapshotId).toBe('snapshot-x')
+    expect(state.selectedMissionId).toBeNull()
     expect(state.frameIndex).toBe(0)
   })
 })
