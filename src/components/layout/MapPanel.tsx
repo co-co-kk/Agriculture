@@ -78,7 +78,12 @@ export const MapPanel = ({
 
   return (
     <section className="space-y-3 xl:col-span-6">
-      <PanelCard title="农田风险分布地图" subtitle="基于无人机影像识别生成风险热力网格">
+      {/* 地图主视图卡片，强调空间布局与飞行路径 */}
+      <PanelCard
+        title="农田风险分布地图"
+        subtitle="基于无人机影像识别生成风险热力网格"
+        tone="dark"
+      >
         <AgriMap
           plots={plots}
           cells={mapCells}
@@ -89,18 +94,50 @@ export const MapPanel = ({
         />
       </PanelCard>
 
-      <PanelCard title="当前帧识别预览" subtitle="支持目标框叠加与结果明细联动">
+      {/* 当前帧识别预览，采用左右结构：影像 + 明细 */}
+      <PanelCard title="当前帧识别预览" subtitle="支持目标框叠加与结果明细联动" tone="dark">
         {!frame ? (
           <EmptyState title="暂无帧数据" description="请先选择任务后查看识别详情" />
         ) : (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div className="relative overflow-hidden rounded-xl border border-slate-200 lg:col-span-2">
+            <div className="relative overflow-hidden rounded-xl border border-emerald-500/40 bg-slate-900/80 lg:col-span-2">
+              {/* 左侧上一帧按钮：在第一帧时禁用 */}
+              <button
+                type="button"
+                aria-label="上一帧"
+                disabled={!mission || mission.frameIndex === 0}
+                onClick={() => {
+                  if (!mission || mission.frameIndex === 0) return
+                  const prev = mission.frameIndex - 1
+                  // 通过自定义事件通知时间轴更新
+                  window.dispatchEvent(new CustomEvent('dashboard:frame-change', { detail: prev }))
+                }}
+                className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-600/80 bg-slate-900/90 text-slate-200 shadow-[0_0_12px_rgba(15,23,42,0.9)] transition disabled:cursor-not-allowed disabled:opacity-30 hover:border-emerald-400 hover:text-emerald-200"
+              >
+                ‹
+              </button>
+
+              {/* 右侧下一帧按钮：在最后一帧时禁用 */}
+              <button
+                type="button"
+                aria-label="下一帧"
+                disabled={!mission || mission.frameIndex >= (mission.frames.length - 1)}
+                onClick={() => {
+                  if (!mission || mission.frameIndex >= (mission.frames.length - 1)) return
+                  const next = mission.frameIndex + 1
+                  window.dispatchEvent(new CustomEvent('dashboard:frame-change', { detail: next }))
+                }}
+                className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-slate-600/80 bg-slate-900/90 text-slate-200 shadow-[0_0_12px_rgba(15,23,42,0.9)] transition disabled:cursor-not-allowed disabled:opacity-30 hover:border-emerald-400 hover:text-emerald-200"
+              >
+                ›
+              </button>
+
               <img src={frame.imageUrl} alt="无人机识别帧" className="h-full w-full object-cover" />
 
               {frameDetections.map((item) => (
                 <div
                   key={item.id}
-                  className="absolute border-2 border-rose-500/90"
+                  className="absolute border-2 border-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,0.9)]"
                   style={{
                     left: `${item.bbox.x * 100}%`,
                     top: `${item.bbox.y * 100}%`,
@@ -111,20 +148,22 @@ export const MapPanel = ({
               ))}
             </div>
 
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-sm font-semibold text-slate-800">帧信息</p>
-              <p className="text-xs text-slate-500">时间：{new Date(frame.capturedAt).toLocaleString()}</p>
-              <p className="text-xs text-slate-500">NDVI：{frame.ndvi.toFixed(2)}</p>
-              <p className="text-xs text-slate-500">温度：{frame.temperature.toFixed(1)}℃</p>
-              <p className="text-xs text-slate-500">湿度：{frame.humidity.toFixed(1)}%</p>
-              <p className="mt-2 text-xs font-medium text-slate-700">识别目标：{frameDetections.length} 个</p>
+            <div className="space-y-2 rounded-xl border border-slate-700/80 bg-slate-900/90 p-3">
+              <p className="text-sm font-semibold text-slate-50">帧信息</p>
+              <p className="text-xs text-slate-400">时间：{new Date(frame.capturedAt).toLocaleString()}</p>
+              <p className="text-xs text-slate-400">NDVI：{frame.ndvi.toFixed(2)}</p>
+              <p className="text-xs text-slate-400">温度：{frame.temperature.toFixed(1)}℃</p>
+              <p className="text-xs text-slate-400">湿度：{frame.humidity.toFixed(1)}%</p>
+              <p className="mt-2 text-xs font-medium text-emerald-300">
+                识别目标：{frameDetections.length} 个
+              </p>
 
               <div className="max-h-36 space-y-1 overflow-y-auto">
                 {frameDetections.slice(0, 6).map((item) => (
                   <button
                     type="button"
                     key={`detail-${item.id}`}
-                    className="w-full rounded-lg bg-white px-2 py-1 text-left text-xs text-slate-600 hover:bg-emerald-50"
+                    className="w-full rounded-lg border border-slate-700/80 bg-slate-900/90 px-2 py-1 text-left text-xs text-slate-300 transition-colors hover:border-emerald-400/70 hover:bg-emerald-500/10"
                     onClick={() => onSelectPlot(item.plotId)}
                   >
                     地块{item.plotId} · {detectionTag(scene, item)}

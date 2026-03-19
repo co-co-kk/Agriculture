@@ -40,8 +40,13 @@ export const LeftSidebar = ({
   onFilterChange,
 }: LeftSidebarProps): JSX.Element => {
   return (
+    // 左侧侧栏使用垂直栈布局，内部卡片由 PanelCard 控制具体样式
     <aside className="space-y-3 xl:col-span-3">
-      <PanelCard title="筛选条件" subtitle="按场景维度过滤看板结果">
+      <PanelCard
+        title="筛选条件"
+        subtitle="按场景维度过滤看板结果"
+        tone="dark"
+      >
         <FilterPanel scene={scene} filter={filter} onFilterChange={onFilterChange} />
       </PanelCard>
 

@@ -58,68 +58,75 @@ export const DashboardPage = ({ onOpenDataCenter }: DashboardPageProps): JSX.Ele
   const suggestions = data.dashboard?.suggestions ?? []
 
   return (
-    <main className="mx-auto max-w-[1700px] space-y-3 p-3 xl:p-4">
-      <HeaderBar
-        scene={scene}
-        kpis={data.dashboard?.kpis ?? []}
-        snapshots={data.snapshots}
-        snapshotId={data.snapshotId}
-        compareEnabled={comparison.enabled}
-        compareLeftSnapshotId={comparison.leftSnapshotId}
-        compareRightSnapshotId={comparison.rightSnapshotId}
-        onSceneChange={setScene}
-        onSnapshotChange={setSnapshotId}
-        onCompareEnabledChange={setComparisonEnabled}
-        onCompareLeftSnapshotChange={setComparisonLeftSnapshotId}
-        onCompareRightSnapshotChange={setComparisonRightSnapshotId}
-        onRefresh={() => void data.refetchAll()}
-        onOpenReport={() => setReportOpen(true)}
-        onOpenDataCenter={onOpenDataCenter}
-      />
-
-      {comparison.enabled ? <ComparePanel result={data.compareResult} /> : null}
-
-      {data.isError ? <EmptyState title="数据加载失败" description="请检查 mock 服务状态后重试" /> : null}
-
-      <section className="grid grid-cols-1 gap-3 xl:grid-cols-12">
-        <LeftSidebar
+    // 整个页面使用深色驾驶舱背景，提升整体沉浸感
+    <main className="min-h-screen bg-slate-950/95 px-2 py-3 md:px-4 md:py-4">
+      {/* 中央驾驶舱容器：控制最大宽度，统一阴影与圆角 */}
+      <div className="mx-auto max-w-[1700px] space-y-3 rounded-2xl border border-slate-800/80 bg-slate-900/80 p-3 shadow-[0_0_40px_rgba(15,23,42,0.8)] backdrop-blur">
+        <HeaderBar
           scene={scene}
-          dashboard={data.dashboard}
-          loading={data.isLoading}
-          filter={filter}
-          onFilterChange={setFilter}
-        />
-
-        <MapPanel
-          scene={scene}
-          plots={data.plots}
-          mapCells={mapCells}
-          mission={currentMission}
-          detections={data.detections}
-          selectedPlotId={selectedPlotId}
-          onSelectPlot={setSelectedPlotId}
-        />
-
-        <RightSidebar
-          alerts={data.alerts}
-          hotAreas={hotAreas}
-          suggestions={suggestions}
-          selectedPlotId={selectedPlotId}
-          onSelectPlot={setSelectedPlotId}
+          kpis={data.dashboard?.kpis ?? []}
+          snapshots={data.snapshots}
+          snapshotId={data.snapshotId}
+          compareEnabled={comparison.enabled}
+          compareLeftSnapshotId={comparison.leftSnapshotId}
+          compareRightSnapshotId={comparison.rightSnapshotId}
+          onSceneChange={setScene}
+          onSnapshotChange={setSnapshotId}
+          onCompareEnabledChange={setComparisonEnabled}
+          onCompareLeftSnapshotChange={setComparisonLeftSnapshotId}
+          onCompareRightSnapshotChange={setComparisonRightSnapshotId}
+          onRefresh={() => void data.refetchAll()}
           onOpenReport={() => setReportOpen(true)}
+          onOpenDataCenter={onOpenDataCenter}
         />
-      </section>
 
-      <TimelineBar
-        missions={data.missions}
-        selectedMissionId={selectedMissionId}
-        frameIndex={frameIndex}
-        isPlaying={isPlaying}
-        onMissionChange={setSelectedMissionId}
-        onFrameChange={setFrameIndex}
-        onTogglePlaying={togglePlaying}
-      />
+        {comparison.enabled ? <ComparePanel result={data.compareResult} /> : null}
 
+        {data.isError ? (
+          <EmptyState title="数据加载失败" description="请检查 mock 服务状态后重试" />
+        ) : null}
+
+        <section className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+          <LeftSidebar
+            scene={scene}
+            dashboard={data.dashboard}
+            loading={data.isLoading}
+            filter={filter}
+            onFilterChange={setFilter}
+          />
+
+          <MapPanel
+            scene={scene}
+            plots={data.plots}
+            mapCells={mapCells}
+            mission={currentMission}
+            detections={data.detections}
+            selectedPlotId={selectedPlotId}
+            onSelectPlot={setSelectedPlotId}
+          />
+
+          <RightSidebar
+            alerts={data.alerts}
+            hotAreas={hotAreas}
+            suggestions={suggestions}
+            selectedPlotId={selectedPlotId}
+            onSelectPlot={setSelectedPlotId}
+            onOpenReport={() => setReportOpen(true)}
+          />
+        </section>
+
+        <TimelineBar
+          missions={data.missions}
+          selectedMissionId={selectedMissionId}
+          frameIndex={frameIndex}
+          isPlaying={isPlaying}
+          onMissionChange={setSelectedMissionId}
+          onFrameChange={setFrameIndex}
+          onTogglePlaying={togglePlaying}
+        />
+      </div>
+
+      {/* 报告抽屉保持在容器外层，避免被阴影影响交互 */}
       <ReportDrawer open={reportOpen} report={data.report} onClose={() => setReportOpen(false)} />
     </main>
   )

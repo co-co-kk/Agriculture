@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python /Users/cqweaver/.claude/skills/webapp-testing/scripts/with_server.py --help)",
+      "Bash(python /Users/cqweaver/.claude/skills/webapp-testing/scripts/with_server.py --server \"npm run dev -- --host 127.0.0.1 --port 4173\" --port 4173 --timeout 60 -- python /Users/cqweaver/.claude/skills/webapp-testing/examples/element_discovery.py)",
+      "Bash(python3 /Users/cqweaver/.claude/skills/webapp-testing/scripts/with_server.py --server \"npm run dev -- --host 127.0.0.1 --port 4173\" --port 4173 --timeout 80 -- python3 /Users/cqweaver/.claude/skills/webapp-testing/examples/element_discovery.py)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "WebSearch"
+    ]
+  }
+}

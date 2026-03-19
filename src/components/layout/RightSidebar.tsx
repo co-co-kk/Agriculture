@@ -39,11 +39,12 @@ export const RightSidebar = ({
       <PanelCard
         title="实时告警流"
         subtitle="按时间倒序推送风险事件"
+        tone="dark"
         action={
           <button
             type="button"
             onClick={onOpenReport}
-            className="rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-700"
+            className="rounded-lg border border-emerald-400/40 bg-slate-900/80 px-2 py-1 text-xs text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.35)] transition-colors hover:bg-emerald-500/20"
           >
             查看报告
           </button>
@@ -55,24 +56,26 @@ export const RightSidebar = ({
               key={alert.id}
               type="button"
               onClick={() => onSelectPlot(alert.plotId)}
-              className="w-full rounded-lg border border-slate-200 bg-white p-2 text-left hover:border-emerald-300"
+              className="w-full rounded-lg border border-slate-700/80 bg-slate-900/80 p-2 text-left transition-colors hover:border-emerald-400/70 hover:bg-slate-900"
             >
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-medium text-slate-800">{alert.title}</p>
+                <p className="text-xs font-medium text-slate-50">{alert.title}</p>
                 <StatusBadge text={alert.level} tone={levelTone(alert.level)} />
               </div>
-              <p className="mt-1 text-xs text-slate-500">{alert.description}</p>
-              <p className="mt-1 text-[11px] text-slate-400">{new Date(alert.occurredAt).toLocaleString()}</p>
+              <p className="mt-1 text-xs text-slate-400">{alert.description}</p>
+              <p className="mt-1 text-[11px] text-slate-500">
+                {new Date(alert.occurredAt).toLocaleString()}
+              </p>
             </button>
           ))}
         </div>
       </PanelCard>
 
-      <PanelCard title="高风险区域" subtitle="点击区域可联动地图定位">
+      <PanelCard title="高风险区域" subtitle="点击区域可联动地图定位" tone="dark">
         <HotAreaList areas={hotAreas} selectedPlotId={selectedPlotId} onSelect={onSelectPlot} />
       </PanelCard>
 
-      <PanelCard title="行动建议" subtitle="按优先级输出本次巡检处置动作">
+      <PanelCard title="行动建议" subtitle="按优先级输出本次巡检处置动作" tone="dark">
         <SuggestionList suggestions={suggestions} />
       </PanelCard>
     </aside>

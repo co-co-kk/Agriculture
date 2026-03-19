@@ -26,12 +26,12 @@ const statusLabelMap: Record<IngestionJob['status'], string> = {
 }
 
 const statusToneMap: Record<IngestionJob['status'], string> = {
-  collecting: 'bg-slate-100 text-slate-700',
-  ready_to_parse: 'bg-amber-100 text-amber-700',
-  parsing: 'bg-blue-100 text-blue-700',
-  analyzed: 'bg-emerald-100 text-emerald-700',
-  active: 'bg-emerald-200 text-emerald-900',
-  failed: 'bg-rose-100 text-rose-700',
+  collecting: 'bg-slate-800 text-slate-100',
+  ready_to_parse: 'bg-amber-900/60 text-amber-200',
+  parsing: 'bg-cyan-900/70 text-cyan-200',
+  analyzed: 'bg-emerald-900/70 text-emerald-200',
+  active: 'bg-emerald-600/90 text-emerald-50',
+  failed: 'bg-rose-900/70 text-rose-200',
 }
 
 export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.Element => {
@@ -88,47 +88,55 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
   const snapshots = snapshotQuery.data?.snapshots ?? []
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_10%_10%,rgba(16,185,129,0.18),transparent_32%),radial-gradient(circle_at_90%_85%,rgba(15,23,42,0.12),transparent_34%),#f6f7f9] px-4 py-6">
-      <div className="mx-auto max-w-6xl space-y-6">
+    // 使用与 Dashboard 一致的深色驾驶舱背景
+    <main className="min-h-screen bg-slate-950/95 px-2 py-3 md:px-4 md:py-4">
+      {/* 中央容器：保持最大宽度和深色卡片风格，与仪表盘统一 */}
+      <div className="mx-auto max-w-6xl space-y-5 rounded-2xl border border-slate-800/80 bg-slate-900/90 p-4 shadow-[0_0_40px_rgba(15,23,42,0.85)] backdrop-blur">
+        {/* 顶部标题区域 */}
         <motion.header
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="rounded-2xl border border-slate-200/90 bg-white/90 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur"
+          transition={{ duration: 0.3 }}
+          className="rounded-2xl border border-slate-700/80 bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95 p-5 shadow-[0_0_24px_rgba(15,23,42,0.9)]"
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Data Center</h1>
-              <p className="mt-1 text-sm text-slate-500">采集 → 解析 → 自动生效 → 历史回看 → 双版本对比</p>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-50">数据中心 · Data Center</h1>
+              <p className="mt-1 text-xs text-slate-400">
+                采集 → 解析 → 自动生效 → 历史回看 → 双版本对比
+              </p>
             </div>
             <button
               type="button"
               onClick={onOpenDashboard}
-              className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-emerald-800"
+              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-[0_0_18px_rgba(16,185,129,0.8)] transition hover:-translate-y-0.5 hover:bg-emerald-500"
             >
-              返回看板
+              返回作战看板
             </button>
           </div>
         </motion.header>
 
+        {/* 上方数据源卡片区域 */}
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {sources.map((source, index) => (
             <motion.article
               key={source.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_14px_36px_rgba(15,23,42,0.10)]"
+              className="rounded-2xl border border-slate-700/80 bg-slate-900/95 p-5 shadow-[0_10px_32px_rgba(15,23,42,0.9)] transition hover:-translate-y-1 hover:border-emerald-500/70 hover:shadow-[0_18px_40px_rgba(16,185,129,0.45)]"
             >
-              <p className="text-xs uppercase tracking-wide text-emerald-700">{source.provider}</p>
-              <h2 className="mt-2 text-lg font-semibold text-slate-900">{source.name}</h2>
-              <p className="mt-2 text-sm text-slate-500">{source.description}</p>
-              <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500">{source.endpoint}</p>
+              <p className="text-xs uppercase tracking-wide text-emerald-300">{source.provider}</p>
+              <h2 className="mt-2 text-lg font-semibold text-slate-50">{source.name}</h2>
+              <p className="mt-2 text-sm text-slate-400">{source.description}</p>
+              <p className="mt-3 rounded-xl bg-slate-900/90 px-3 py-2 text-xs text-slate-500">
+                {source.endpoint}
+              </p>
               <button
                 type="button"
                 disabled={collectMutation.isPending}
                 onClick={() => collectMutation.mutate(source.id)}
-                className="mt-4 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:border-emerald-500 hover:text-emerald-700 disabled:opacity-50"
+                className="mt-4 w-full rounded-xl border border-emerald-500/70 bg-slate-900/90 px-3 py-2 text-sm font-medium text-emerald-200 shadow-[0_0_14px_rgba(16,185,129,0.7)] transition hover:-translate-y-0.5 hover:bg-emerald-500/20 disabled:opacity-50"
               >
                 点击采集
               </button>
@@ -136,12 +144,13 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
           ))}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_32px_rgba(15,23,42,0.06)]">
-          <h3 className="text-base font-semibold text-slate-900">任务流转表</h3>
+        {/* 任务流转表 */}
+        <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_10px_32px_rgba(15,23,42,0.9)]">
+          <h3 className="text-base font-semibold text-slate-50">任务流转表</h3>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-xs text-slate-500">
+                <tr className="border-b border-slate-800 text-xs text-slate-400">
                   <th className="py-2 pr-3">任务</th>
                   <th className="py-2 pr-3">来源</th>
                   <th className="py-2 pr-3">状态</th>
@@ -151,22 +160,29 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
               </thead>
               <tbody>
                 {jobs.map((job) => (
-                  <tr key={job.id} className="border-b border-slate-100">
-                    <td className="py-3 pr-3 font-medium text-slate-800">{job.id}</td>
-                    <td className="py-3 pr-3 text-slate-600">{job.sourceName}</td>
+                  <tr
+                    key={job.id}
+                    className="border-b border-slate-800/80 bg-slate-900/60 hover:bg-slate-900/90"
+                  >
+                    <td className="py-3 pr-3 font-medium text-slate-50">{job.id}</td>
+                    <td className="py-3 pr-3 text-slate-300">{job.sourceName}</td>
                     <td className="py-3 pr-3">
-                      <span className={`rounded-lg px-2 py-1 text-xs ${statusToneMap[job.status]}`}>
+                      <span
+                        className={`rounded-lg px-2 py-1 text-xs ${statusToneMap[job.status]}`}
+                      >
                         {statusLabelMap[job.status]}
                       </span>
                     </td>
-                    <td className="py-3 pr-3 text-slate-500">{new Date(job.updatedAt).toLocaleString()}</td>
+                    <td className="py-3 pr-3 text-slate-400">
+                      {new Date(job.updatedAt).toLocaleString()}
+                    </td>
                     <td className="py-3">
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
                           disabled={job.status !== 'ready_to_parse' || parseMutation.isPending}
                           onClick={() => parseMutation.mutate(job.id)}
-                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:border-emerald-500 hover:text-emerald-700 disabled:opacity-40"
+                          className="rounded-lg border border-slate-700/80 px-2 py-1 text-xs text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200 disabled:opacity-40"
                         >
                           解析
                         </button>
@@ -178,14 +194,14 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
                               setCurrentMutation.mutate(job.snapshotId)
                             }
                           }}
-                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:border-emerald-500 hover:text-emerald-700 disabled:opacity-40"
+                          className="rounded-lg border border-slate-700/80 px-2 py-1 text-xs text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200 disabled:opacity-40"
                         >
                           设为当前
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedJob(job)}
-                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700 transition hover:border-emerald-500 hover:text-emerald-700"
+                          className="rounded-lg border border-slate-700/80 px-2 py-1 text-xs text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
                         >
                           详情
                         </button>
@@ -198,26 +214,31 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_32px_rgba(15,23,42,0.06)]">
-          <h3 className="text-base font-semibold text-slate-900">历史快照</h3>
+        {/* 历史快照区域 */}
+        <section className="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-5 shadow-[0_10px_32px_rgba(15,23,42,0.9)]">
+          <h3 className="text-base font-semibold text-slate-50">历史快照</h3>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
             {snapshots.map((snapshot) => (
               <article
                 key={snapshot.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+                className="rounded-2xl border border-slate-700/80 bg-slate-900/70 p-4 transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-[0_12px_32px_rgba(16,185,129,0.4)]"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-900">{snapshot.date}</p>
-                  <span className={`rounded-lg px-2 py-1 text-xs ${snapshot.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
+                  <p className="text-sm font-semibold text-slate-50">{snapshot.date}</p>
+                  <span
+                    className={`rounded-lg px-2 py-1 text-xs ${snapshot.active ? 'bg-emerald-600/90 text-emerald-50' : 'bg-slate-700 text-slate-200'}`}
+                  >
                     {snapshot.active ? '当前' : '历史'}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-slate-500">来源：{snapshot.sourceName}</p>
-                <p className="mt-1 text-xs text-slate-500">生成时间：{new Date(snapshot.createdAt).toLocaleString()}</p>
+                <p className="mt-2 text-xs text-slate-400">来源：{snapshot.sourceName}</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  生成时间：{new Date(snapshot.createdAt).toLocaleString()}
+                </p>
                 <button
                   type="button"
                   onClick={() => setCurrentMutation.mutate(snapshot.id)}
-                  className="mt-3 rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-700 transition hover:border-emerald-500 hover:text-emerald-700"
+                  className="mt-3 rounded-xl border border-emerald-500/70 bg-slate-900/80 px-3 py-1.5 text-xs text-emerald-200 transition hover:bg-emerald-500/20"
                 >
                   设为当前
                 </button>
@@ -226,24 +247,25 @@ export const DataCenterPage = ({ onOpenDashboard }: DataCenterPageProps): JSX.El
           </div>
         </section>
 
+        {/* 任务详情区域 */}
         {selectedJob ? (
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_32px_rgba(15,23,42,0.06)]">
+          <section className="rounded-2xl border border-slate-800/80 bg-slate-950/90 p-5 shadow-[0_10px_32px_rgba(15,23,42,0.9)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">任务详情</h3>
+              <h3 className="text-base font-semibold text-slate-50">任务详情</h3>
               <button
                 type="button"
                 onClick={() => setSelectedJob(null)}
-                className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                className="rounded-lg border border-slate-700/80 px-2 py-1 text-xs text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
               >
                 关闭
               </button>
             </div>
-            <pre className="mt-3 overflow-x-auto rounded-xl bg-slate-900 p-4 text-xs text-slate-100">
+            <pre className="mt-3 max-h-80 overflow-x-auto overflow-y-auto rounded-xl bg-slate-900 p-4 text-xs text-slate-100">
 {JSON.stringify(selectedJob, null, 2)}
             </pre>
           </section>
         ) : null}
       </div>
-    </div>
+    </main>
   )
 }
